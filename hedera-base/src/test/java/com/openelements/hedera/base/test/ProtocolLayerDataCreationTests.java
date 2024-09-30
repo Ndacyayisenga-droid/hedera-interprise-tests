@@ -11,19 +11,8 @@ import com.hedera.hashgraph.sdk.ContractFunctionResult;
 import com.hedera.hashgraph.sdk.proto.ContractFunctionResultOrBuilder;
 import com.openelements.hedera.base.Account;
 import com.openelements.hedera.base.ContractParam;
-import com.openelements.hedera.base.protocol.AccountBalanceRequest;
-import com.openelements.hedera.base.protocol.AccountBalanceResponse;
-import com.openelements.hedera.base.protocol.AccountCreateRequest;
-import com.openelements.hedera.base.protocol.AccountCreateResult;
-import com.openelements.hedera.base.protocol.AccountDeleteRequest;
-import com.openelements.hedera.base.protocol.AccountDeleteResult;
-import com.openelements.hedera.base.protocol.ContractCallRequest;
-import com.openelements.hedera.base.protocol.ContractCallResult;
-import com.openelements.hedera.base.protocol.ContractCreateRequest;
-import com.openelements.hedera.base.protocol.ContractCreateResult;
-import com.openelements.hedera.base.protocol.ContractDeleteRequest;
-import com.openelements.hedera.base.protocol.ContractDeleteResult;
-import com.openelements.hedera.base.protocol.FileAppendRequest;
+import com.openelements.hedera.base.protocol.*;
+
 import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.time.Instant;
@@ -334,5 +323,17 @@ public class ProtocolLayerDataCreationTests {
         Assertions.assertThrows(IllegalArgumentException.class, () -> new FileAppendRequest(maxTransactionFee, Duration.ofSeconds(-1), fileId, contents, fileMemo));
         Assertions.assertThrows(IllegalArgumentException.class, () -> new FileAppendRequest(maxTransactionFee, transactionValidDuration, fileId, largeContents, fileMemo));
         Assertions.assertThrows(IllegalArgumentException.class, () -> new FileAppendRequest(maxTransactionFee, transactionValidDuration, fileId, largeContents, longFileMemo));
+    }
+
+    @Test
+    public void testTokenTransferResultCreation() {
+        //given
+        final TransactionId transactionId = TransactionId.generate(new AccountId(0, 0, 12345));
+        final Status status = Status.SUCCESS;
+
+        //then
+        Assertions.assertDoesNotThrow(() -> new TokenTransferResult(transactionId, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferResult(null, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferResult(transactionId, null));
     }
 }
