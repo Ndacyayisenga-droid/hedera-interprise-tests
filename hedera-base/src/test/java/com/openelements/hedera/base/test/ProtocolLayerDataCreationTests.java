@@ -9,6 +9,7 @@ import com.hedera.hashgraph.sdk.Status;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.ContractFunctionResult;
 import com.hedera.hashgraph.sdk.proto.ContractFunctionResultOrBuilder;
+import com.hedera.hashgraph.sdk.TokenId;
 import com.openelements.hedera.base.Account;
 import com.openelements.hedera.base.ContractParam;
 import com.openelements.hedera.base.protocol.AccountBalanceRequest;
@@ -26,6 +27,15 @@ import com.openelements.hedera.base.protocol.ContractDeleteResult;
 import com.openelements.hedera.base.protocol.FileAppendRequest;
 import com.openelements.hedera.base.protocol.TokenTransferResult;
 import com.openelements.hedera.base.protocol.TokenMintResult;
+import com.openelements.hedera.base.protocol.TokenCreateResult;
+import com.openelements.hedera.base.protocol.TokenBurnResult;
+import com.openelements.hedera.base.protocol.TokenAssociateResult;
+import com.openelements.hedera.base.protocol.FileUpdateResult;
+import com.openelements.hedera.base.protocol.FileInfoResponse;
+import com.openelements.hedera.base.protocol.FileDeleteResult;
+import com.openelements.hedera.base.protocol.FileCreateResult;
+import com.openelements.hedera.base.protocol.FileContentsResponse;
+import com.openelements.hedera.base.protocol.FileAppendResult;
 
 import java.lang.reflect.Constructor;
 import java.time.Duration;
@@ -364,4 +374,117 @@ public class ProtocolLayerDataCreationTests {
         Assertions.assertThrows(NullPointerException.class, () -> new TokenMintResult(transactionId, null, serials));
         Assertions.assertThrows(NullPointerException.class, () -> new TokenMintResult(transactionId, status, null));
     }
+
+    @Test
+    public void testTokenCreateResultCreation() {
+        // Given
+        final TransactionId transactionId = TransactionId.generate(new AccountId(0, 0, 12345));
+        final Status status = Status.SUCCESS;
+        final TokenId tokenId = TokenId.fromString("0.0.12345");
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> new TokenCreateResult(transactionId, status, tokenId));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenCreateResult(null, status, tokenId));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenCreateResult(transactionId, null, tokenId));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenCreateResult(transactionId, status, null));
+    }
+
+    @Test
+    public void testTokenBurnResultCreation() {
+        // Given
+        final TransactionId transactionId = TransactionId.generate(new AccountId(0, 0, 12345));
+        final Status status = Status.SUCCESS;
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> new TokenBurnResult(transactionId, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenBurnResult(null, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenBurnResult(transactionId, null));
+    }
+
+    @Test
+    public void testTokenAssociateResultCreation() {
+        // Given
+        final TransactionId transactionId = TransactionId.generate(new AccountId(0, 0, 12345));
+        final Status status = Status.SUCCESS;
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> new TokenAssociateResult(transactionId, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenAssociateResult(null, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenAssociateResult(transactionId, null));
+    }
+
+    @Test
+    void testFileUpdateResultCreation() throws Exception {
+        // Given
+        final TransactionId transactionId = TransactionId.generate(new AccountId(0, 0, 12345));
+        final Status status = Status.SUCCESS;
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> new FileUpdateResult(transactionId, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileUpdateResult(null, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileUpdateResult(transactionId, null));
+    }
+
+    @Test
+    void testFileInfoResponseCreation() {
+        // Given
+        final FileId fileId = FileId.fromString("0.0.12345");
+        final int size = 100;
+        final boolean deleted = false;
+        final Instant expirationTime = Instant.now().plus(Duration.ofDays(30));
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> new FileInfoResponse(fileId, size, deleted, expirationTime));
+    }
+
+    @Test
+    void testFileDeleteResultCreation() {
+        // Given
+        final TransactionId transactionId = TransactionId.generate(new AccountId(0, 0, 12345));
+        final Status status = Status.SUCCESS;
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> new FileDeleteResult(transactionId, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileDeleteResult(null, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileDeleteResult(transactionId, null));
+    }
+
+    @Test
+    void testFileCreateResultCreation() throws Exception {
+        // Given
+        final TransactionId transactionId = TransactionId.generate(new AccountId(0, 0, 12345));
+        final Status status = Status.SUCCESS;
+        final FileId fileId = FileId.fromString("0.0.12345");
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> new FileCreateResult(transactionId, status, fileId));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileCreateResult(null, status, fileId));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileCreateResult(transactionId, null, fileId));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileCreateResult(transactionId, status, null));
+    }
+
+    @Test
+    void testFileContentsResponseCreation() throws Exception {
+        // Given
+        final FileId fileId = FileId.fromString("0.0.12345");
+        final byte[] contents = new byte[]{1, 2, 3};
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> new FileContentsResponse(fileId, contents));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileContentsResponse(null, contents));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileContentsResponse(fileId, null));
+    }
+
+    @Test
+    void testFileAppendResultCreation() throws Exception {
+        // Given
+        final TransactionId transactionId = TransactionId.generate(new AccountId(0, 0, 12345)); // Mock TransactionId
+        final Status status = Status.SUCCESS; // Mock Status
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> new FileAppendResult(transactionId, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileAppendResult(null, status));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileAppendResult(transactionId, null));
+    }
+
 }
