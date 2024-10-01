@@ -355,16 +355,23 @@ public class ProtocolLayerDataCreationTests {
         final TokenId tokenId = TokenId.fromString(tokenIdString);
         final long serial = 1000L;
 
-        TokenTransferRequest validRequest = TokenTransferRequest.of(tokenId, List.of(serial), accountIdFrom, accountIdTo, PrivateKey.generate());
-
         // Then
         Assertions.assertDoesNotThrow(() -> TokenTransferRequest.of(tokenId, serial, accountIdFrom, accountIdTo, PrivateKey.generate()));
-        Assertions.assertDoesNotThrow(() -> validRequest);
+        Assertions.assertDoesNotThrow(() -> TokenTransferRequest.of(tokenId, List.of(serial), accountIdFrom, accountIdTo, PrivateKey.generate()));
+
+        // Negative tests
         Assertions.assertThrows(NullPointerException.class, () -> TokenTransferRequest.of(null, serial, accountIdFrom, accountIdTo, PrivateKey.generate()));
         Assertions.assertThrows(NullPointerException.class, () -> TokenTransferRequest.of(tokenId, serial, null, accountIdTo, PrivateKey.generate()));
         Assertions.assertThrows(NullPointerException.class, () -> TokenTransferRequest.of(tokenId, serial, accountIdFrom, null, PrivateKey.generate()));
         Assertions.assertThrows(NullPointerException.class, () -> TokenTransferRequest.of(tokenId, serial, accountIdFrom, accountIdTo, null));
+
+        // Check for transferring to self
         Assertions.assertThrows(IllegalArgumentException.class, () -> TokenTransferRequest.of(tokenId, serial, accountIdFrom, accountIdFrom, PrivateKey.generate())); // Cannot transfer to self
+
+        // Check for negative serials
         Assertions.assertThrows(IllegalArgumentException.class, () -> TokenTransferRequest.of(tokenId, List.of(-1L), accountIdFrom, accountIdTo, PrivateKey.generate())); // Negative serial
+
+        // Check for empty serials
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TokenTransferRequest.of(tokenId, List.of(), accountIdFrom, accountIdTo, PrivateKey.generate())); // Empty serials list
     }
 }
