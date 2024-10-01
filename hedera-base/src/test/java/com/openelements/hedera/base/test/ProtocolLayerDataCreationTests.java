@@ -36,6 +36,7 @@ import com.openelements.hedera.base.protocol.FileDeleteResult;
 import com.openelements.hedera.base.protocol.FileCreateResult;
 import com.openelements.hedera.base.protocol.FileContentsResponse;
 import com.openelements.hedera.base.protocol.FileAppendResult;
+import com.openelements.hedera.base.protocol.TokenTransferRequest;
 
 import java.lang.reflect.Constructor;
 import java.time.Duration;
@@ -485,6 +486,53 @@ public class ProtocolLayerDataCreationTests {
         Assertions.assertDoesNotThrow(() -> new FileAppendResult(transactionId, status));
         Assertions.assertThrows(NullPointerException.class, () -> new FileAppendResult(null, status));
         Assertions.assertThrows(NullPointerException.class, () -> new FileAppendResult(transactionId, null));
+    }
+
+    @Test
+    void testTokenTransferRequestCreation() {
+        //given
+        final Hbar maxTransactionFee = Hbar.fromTinybars(1000);
+        final Duration transactionValidDuration = Duration.ofSeconds(120);
+        final TokenId tokenId = TokenId.fromString("0.0.1234");
+        final List<Long> serials = List.of(1L, 2L);
+        final AccountId sender = AccountId.fromString("0.0.5678");
+        final AccountId receiver = AccountId.fromString("0.0.9876");
+        final PrivateKey senderKey = PrivateKey.generate();
+        final List<Long> emptySerials = List.of();
+        final List<Long> negativeSerials = List.of(-1L);
+
+        //then
+        Assertions.assertDoesNotThrow(() -> new TokenTransferRequest(
+                maxTransactionFee, transactionValidDuration, tokenId, serials, sender, receiver, senderKey));
+
+        Assertions.assertDoesNotThrow(() -> TokenTransferRequest.of(tokenId, 1L, sender, receiver, senderKey));
+
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferRequest(
+                null, transactionValidDuration, tokenId, serials, sender, receiver, senderKey));
+
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferRequest(
+                maxTransactionFee, null, tokenId, serials, sender, receiver, senderKey));
+
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferRequest(
+                maxTransactionFee, transactionValidDuration, null, serials, sender, receiver, senderKey));
+
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferRequest(
+                maxTransactionFee, transactionValidDuration, tokenId, null, sender, receiver, senderKey));
+
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferRequest(
+                maxTransactionFee, transactionValidDuration, tokenId, serials, null, receiver, senderKey));
+
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferRequest(
+                maxTransactionFee, transactionValidDuration, tokenId, serials, sender, null, senderKey));
+
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferRequest(
+                maxTransactionFee, transactionValidDuration, tokenId, serials, sender, receiver, null));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new TokenTransferRequest(
+                maxTransactionFee, transactionValidDuration, tokenId, emptySerials, sender, receiver, senderKey));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new TokenTransferRequest(
+                maxTransactionFee, transactionValidDuration, tokenId, negativeSerials, sender, receiver, senderKey));
     }
 
 }
