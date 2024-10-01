@@ -1,31 +1,10 @@
 package com.openelements.hedera.base.test;
 
-import com.hedera.hashgraph.sdk.AccountId;
-import com.hedera.hashgraph.sdk.ContractId;
-import com.hedera.hashgraph.sdk.FileId;
-import com.hedera.hashgraph.sdk.Hbar;
-import com.hedera.hashgraph.sdk.PrivateKey;
-import com.hedera.hashgraph.sdk.Status;
-import com.hedera.hashgraph.sdk.TransactionId;
-import com.hedera.hashgraph.sdk.ContractFunctionResult;
+import com.hedera.hashgraph.sdk.*;
 import com.hedera.hashgraph.sdk.proto.ContractFunctionResultOrBuilder;
 import com.openelements.hedera.base.Account;
 import com.openelements.hedera.base.ContractParam;
-import com.openelements.hedera.base.protocol.AccountBalanceRequest;
-import com.openelements.hedera.base.protocol.AccountBalanceResponse;
-import com.openelements.hedera.base.protocol.AccountCreateRequest;
-import com.openelements.hedera.base.protocol.AccountCreateResult;
-import com.openelements.hedera.base.protocol.AccountDeleteRequest;
-import com.openelements.hedera.base.protocol.AccountDeleteResult;
-import com.openelements.hedera.base.protocol.ContractCallRequest;
-import com.openelements.hedera.base.protocol.ContractCallResult;
-import com.openelements.hedera.base.protocol.ContractCreateRequest;
-import com.openelements.hedera.base.protocol.ContractCreateResult;
-import com.openelements.hedera.base.protocol.ContractDeleteRequest;
-import com.openelements.hedera.base.protocol.ContractDeleteResult;
-import com.openelements.hedera.base.protocol.FileAppendRequest;
-import com.openelements.hedera.base.protocol.TokenTransferResult;
-import com.openelements.hedera.base.protocol.TokenMintResult;
+import com.openelements.hedera.base.protocol.*;
 
 import java.lang.reflect.Constructor;
 import java.time.Duration;
@@ -363,5 +342,29 @@ public class ProtocolLayerDataCreationTests {
         Assertions.assertThrows(NullPointerException.class, () -> new TokenMintResult(null, status, serials));
         Assertions.assertThrows(NullPointerException.class, () -> new TokenMintResult(transactionId, null, serials));
         Assertions.assertThrows(NullPointerException.class, () -> new TokenMintResult(transactionId, status, null));
+    }
+
+    @Test
+    void testTokenTransferRequestCreation() {
+        // Given
+        final String accountIdStringFrom = "0.0.12345";
+        final AccountId accountIdFrom = AccountId.fromString(accountIdStringFrom);
+        final String accountIdStringTo = "0.0.54321";
+        final AccountId accountIdTo = AccountId.fromString(accountIdStringTo);
+        final String tokenIdString = "1.2.345678";
+        final TokenId tokenId = TokenId.fromString(tokenIdString);
+        final long serial = 1000L;
+
+        TokenTransferRequest validRequest = TokenTransferRequest.of(tokenId, List.of(serial), accountIdFrom, accountIdTo, PrivateKey.generate());
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> TokenTransferRequest.of(tokenId, serial, accountIdFrom, accountIdTo, PrivateKey.generate()));
+        Assertions.assertDoesNotThrow(() -> validRequest);
+        Assertions.assertThrows(NullPointerException.class, () -> TokenTransferRequest.of(null, serial, accountIdFrom, accountIdTo, PrivateKey.generate()));
+        Assertions.assertThrows(NullPointerException.class, () -> TokenTransferRequest.of(tokenId, serial, null, accountIdTo, PrivateKey.generate()));
+        Assertions.assertThrows(NullPointerException.class, () -> TokenTransferRequest.of(tokenId, serial, accountIdFrom, null, PrivateKey.generate()));
+        Assertions.assertThrows(NullPointerException.class, () -> TokenTransferRequest.of(tokenId, serial, accountIdFrom, accountIdTo, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TokenTransferRequest.of(tokenId, serial, accountIdFrom, accountIdFrom, PrivateKey.generate())); // Cannot transfer to self
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TokenTransferRequest.of(tokenId, List.of(-1L), accountIdFrom, accountIdTo, PrivateKey.generate())); // Negative serial
     }
 }
