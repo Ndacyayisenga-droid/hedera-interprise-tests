@@ -25,6 +25,7 @@ import com.openelements.hedera.base.protocol.ContractDeleteRequest;
 import com.openelements.hedera.base.protocol.ContractDeleteResult;
 import com.openelements.hedera.base.protocol.FileAppendRequest;
 import com.openelements.hedera.base.protocol.TokenTransferResult;
+import com.openelements.hedera.base.protocol.TokenMintResult;
 
 import java.lang.reflect.Constructor;
 import java.time.Duration;
@@ -348,5 +349,19 @@ public class ProtocolLayerDataCreationTests {
         Assertions.assertDoesNotThrow(() -> new TokenTransferResult(transactionId, status));
         Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferResult(null, status));
         Assertions.assertThrows(NullPointerException.class, () -> new TokenTransferResult(transactionId, null));
+    }
+
+    @Test
+    public void testTokenMintResultCreation() {
+        // Given
+        final TransactionId transactionId = TransactionId.generate(new AccountId(0, 0, 12345));
+        final Status status = Status.SUCCESS;
+        final List<Long> serials = List.of(1L, 2L, 3L);
+
+        // Then
+        Assertions.assertDoesNotThrow(() -> new TokenMintResult(transactionId, status, serials));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenMintResult(null, status, serials));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenMintResult(transactionId, null, serials));
+        Assertions.assertThrows(NullPointerException.class, () -> new TokenMintResult(transactionId, status, null));
     }
 }
