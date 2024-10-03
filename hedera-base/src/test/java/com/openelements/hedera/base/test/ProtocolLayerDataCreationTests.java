@@ -44,6 +44,7 @@ import com.openelements.hedera.base.protocol.TokenBurnRequest;
 import com.openelements.hedera.base.protocol.TokenAssociateRequest;
 import com.openelements.hedera.base.protocol.FileUpdateRequest;
 import com.openelements.hedera.base.protocol.FileInfoRequest;
+import com.openelements.hedera.base.protocol.FileContentsRequest;
 
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
@@ -460,7 +461,7 @@ public class ProtocolLayerDataCreationTests {
     }
 
     @Test
-    void testFileCreateResultCreation() throws Exception {
+    void testFileCreateResultCreation() {
         // Given
         final TransactionId transactionId = TransactionId.generate(new AccountId(0, 0, 12345));
         final Status status = Status.SUCCESS;
@@ -474,7 +475,7 @@ public class ProtocolLayerDataCreationTests {
     }
 
     @Test
-    void testFileContentsResponseCreation() throws Exception {
+    void testFileContentsResponseCreation() {
         // Given
         final FileId fileId = FileId.fromString("0.0.12345");
         final byte[] contents = new byte[]{1, 2, 3};
@@ -649,4 +650,22 @@ public class ProtocolLayerDataCreationTests {
         Assertions.assertThrows(NullPointerException.class, () -> FileInfoRequest.of((FileId) null));
     }
 
+    @Test
+    void testFileContentsRequestCreation() {
+        //Given
+        final FileId validFileId = FileId.fromString("0.0.12345");
+        final Hbar queryPayment = Hbar.fromTinybars(1000);
+        final Hbar maxQueryPayment = Hbar.fromTinybars(2000);
+
+        //Then
+        Assertions.assertDoesNotThrow(() -> new FileContentsRequest(validFileId, null, null));
+        Assertions.assertDoesNotThrow(() -> new FileContentsRequest(validFileId, queryPayment, null));
+        Assertions.assertDoesNotThrow(() -> new FileContentsRequest(validFileId, null, maxQueryPayment));
+        Assertions.assertDoesNotThrow(() -> new FileContentsRequest(validFileId, queryPayment, maxQueryPayment));
+        Assertions.assertThrows(NullPointerException.class, () -> new FileContentsRequest(null, queryPayment, maxQueryPayment));
+        Assertions.assertDoesNotThrow(() -> FileContentsRequest.of(validFileId));
+        Assertions.assertDoesNotThrow(() -> FileContentsRequest.of("0.0.12345"));
+        Assertions.assertThrows(NullPointerException.class, () -> FileContentsRequest.of((String) null));
+        Assertions.assertThrows(NullPointerException.class, () -> FileContentsRequest.of((FileId) null));
+    }
 }
